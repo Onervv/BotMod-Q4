@@ -1,1 +1,6 @@
 .vs/
+Backup/
+UpgradeLog.htm
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
