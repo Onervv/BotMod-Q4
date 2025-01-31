@@ -352,6 +352,7 @@ tmtags
 !.vscode/launch.json
 !.vscode/extensions.json
 *.code-workspace
+.vsxproj
 
 # Local History for Visual Studio Code
 .history/
