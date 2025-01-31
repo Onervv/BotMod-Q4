@@ -355,6 +355,10 @@ tmtags
 
 ##### Project Specific 
 
+*.vcproj
+*.vcproj.filters
+*.vcproj.user
+
 game.vcxproj.filters
 game.vcxproj.user
 
