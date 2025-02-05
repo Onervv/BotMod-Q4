@@ -443,22 +443,39 @@ stateResult_t rvWeaponRocketLauncher::State_Fire ( const stateParms_t& parms ) {
 		STAGE_INIT,
 		STAGE_WAIT,
 	};	
+
+	static int shotCount = 0; // Counter to track the number of shots fired
+
 	switch ( parms.stage ) {
 		case STAGE_INIT:
+			shotCount = 0; // Reset the shot counter at the start of the state
 			nextAttackTime = gameLocal.time + (fireRate * owner->PowerUpModifier(PMOD_FIRERATE));
-			Attack(false, 3, 5.0f, 0, 0.30f);
+			Attack(false, 1, 5.0f, 0, 0.30f);
 			PlayAnim(ANIMCHANNEL_LEGS, "fire", parms.blendFrames);
-			
+			shotCount++; // Increment
 			return SRESULT_STAGE ( STAGE_WAIT );
 
 		case STAGE_WAIT:			
 			if ( wsfl.attack && gameLocal.time >= nextAttackTime && ( gameLocal.isClient || AmmoInClip ( ) ) && !wsfl.lowerWeapon ) {
-				SetState ( "Fire", 0 );
-				return SRESULT_DONE;
+				if (shotCount < 3) { // Check if less than 3 shots have been fired
+					SetState ( "Fire", 0 ); // Fire again
+					return SRESULT_DONE;
+				} else {
+					SetState ( "Idle", 4 ); // Return to idle after 3 shots
+					return SRESULT_DONE;
+				}
 			}
 			if ( gameLocal.time > nextAttackTime && AnimDone ( ANIMCHANNEL_LEGS, 4 ) ) {
-				SetState ( "Idle", 4 );
-				return SRESULT_DONE;
+				if (shotCount < 3) { 
+					nextAttackTime = gameLocal.time + (fireRate * owner->PowerUpModifier(PMOD_FIRERATE));
+					Attack(false, 1, 5.0f, 0, 0.30f);
+					PlayAnim(ANIMCHANNEL_LEGS, "fire", parms.blendFrames);
+					shotCount++; // Increment
+					return SRESULT_WAIT;
+				} else {
+					SetState ( "Idle", 4 ); // Return to idle after 3 shots
+					return SRESULT_DONE;
+				}
 			}
 			return SRESULT_WAIT;
 	}
