@@ -1081,6 +1081,8 @@ idPlayer::idPlayer() {
 
 	alreadyDidTeamAnnouncerSound = false;
 
+	killCount				= 0;		// Initalize Kill Count
+
 	doInitWeapon			= false;
 	noclip					= false;
 	godmode					= false;
@@ -1850,6 +1852,20 @@ void idPlayer::Spawn( void ) {
 			hud = uiManager->FindGui( temp, true, false, true );
 		} else {
 			gameLocal.Warning( "idPlayer::Spawn() - No hud for player." );
+		}
+
+		if (spawnArgs.GetString("hud", "", temp)) {
+			hud = uiManager->FindGui(temp, true, false, true);
+			if (!hud) {
+				gameLocal.Warning("idPlayer::Spawn() - Failed to load HUD!");
+			}
+			else {
+				hud->Activate(true, gameLocal.time);
+				hud->SetStateInt("ShopMenu::visible", 0);  // Ensure ShopMenu starts hidden
+			}
+		}
+		else {
+			gameLocal.Warning("idPlayer::Spawn() - No hud for player.");
 		}
 
 		if ( gameLocal.isMultiplayer ) {
@@ -3384,6 +3400,49 @@ void idPlayer::UpdateHudAmmo( idUserInterface *_hud ) {
 
 /*
 ===============
+idPlayer::ToggleShopMenu
+===============
+*/
+void idPlayer::ToggleShopMenu() {
+	if (gameLocal.InCinematic()) return;  // Prevent opening in cutscenes
+
+	if (!hud) {
+		gameLocal.Printf("ERROR: ToggleShopMenu - hud is NULL!\n");
+		return;  // Avoid calling functions on a NULL object
+	}
+
+	int isVisible = hud->State().GetInt("ShopMenu::visible");
+	gameLocal.Printf("DEBUG: ShopMenu visibility state before change: %d\n", isVisible);
+
+	if (isVisible == 1) {
+		hud->SetStateInt("ShopMenu::visible", 0);
+		gameLocal.Printf("Shop closed.\n");
+	}
+	else {
+		hud->SetStateInt("ShopMenu::visible", 1);
+		gameLocal.Printf("Shop opened.\n");
+	}
+}
+
+/*
+===============
+idPlayer::EnemyKilled
+===============
+*/
+void idPlayer::EnemyKilled(idAI* enemy) {
+	if (!enemy) return;  // Ensure the enemy exists
+
+	killCount++;  // Increase kill count
+
+	// Print kill count as an in-game message
+	gameLocal.Printf("Kill Count: %d\n", killCount);
+	gameLocal.Warning("Current Kill Count: %d", killCount);
+
+	UpdateHudStats(hud);  // Update HUD to reflect new kill count
+}
+
+/*
+===============
 idPlayer::UpdateHudStats
 ===============
 */
@@ -3406,6 +3465,18 @@ void idPlayer::UpdateHudStats( idUserInterface *_hud ) {
 		_hud->SetStateInt ( "player_armor", inventory.armor );
 		_hud->SetStateFloat	( "player_armorpct", idMath::ClampFloat ( 0.0f, 1.0f, (float)inventory.armor / (float)inventory.maxarmor ) );
 		_hud->HandleNamedEvent ( "updateArmor" );
+	}
+
+	// Updating Kill Count
+	//temp = _hud->State().GetInt("player_kills", "-1");
+	//if (temp != killCount) {
+	//	_hud->SetStateString("gui::player_kills", va("%d", killCount));  // Convert killCount to string format
+	//}
+	
+	idStr killString = va("kills: %d", killCount);
+	idStr currentKills = _hud->State().GetString("player_kills");
+	if (currentKills != killString) {
+		_hud->SetStateString("player_kills", va("%d", killCount));
 	}
 	
 	// Boss bar

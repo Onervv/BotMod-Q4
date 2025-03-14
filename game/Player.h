@@ -270,6 +270,10 @@ public:
 class idPlayer : public idActor {
 public:
 
+	void EnemyKilled(idAI* enemy);
+	int killCount; // Keeps track of player kills
+	void ToggleShopMenu();  // Function to toggle shop visibility
+
  	enum {
  		EVENT_IMPULSE = idEntity::EVENT_MAXEVENTS,
  		EVENT_EXIT_TELEPORTER,
