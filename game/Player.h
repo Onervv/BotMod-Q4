@@ -363,6 +363,7 @@ public:
 	int						spectator;
 
 	bool					scoreBoardOpen;
+	bool					shopMenuOpen;
 	bool					forceScoreBoard;
 	bool					forceRespawn;
 	int						forceScoreBoardTime;
@@ -766,7 +767,7 @@ public:
 
 	void					SetShowHud( bool showHud );
 	bool					GetShowHud(void);
-	bool                    ToggleShopMenu(void);  // Function to toggle shop visibility
+	void                    ToggleShopMenu(void);  // Function to toggle shop visibility
 	
 
 

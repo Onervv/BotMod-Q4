@@ -1083,6 +1083,7 @@ idPlayer::idPlayer() {
 
 	killCount				= 0;		// Initalize Kill Count
 
+
 	doInitWeapon			= false;
 	noclip					= false;
 	godmode					= false;
@@ -3389,30 +3390,8 @@ void idPlayer::UpdateHudAmmo( idUserInterface *_hud ) {
 idPlayer::ToggleShopMenu
 ===============
 */
-bool idPlayer::ToggleShopMenu(void) {
-	if (gameLocal.InCinematic()) {
-		gameLocal.Printf("DEBUG: Cannot open shop during cutscene.\n");
-		return false;  // Must return a value
-	}
-
-	if (!hud) {
-		gameLocal.Printf("ERROR: ToggleShopMenu - hud is NULL!\n");
-		return false;  // Must return a value
-	}
-
-	int isVisible = hud->State().GetInt("ShopMenu::visible");
-	gameLocal.Printf("DEBUG: ShopMenu visibility state before change: %d\n", isVisible);
-
-	if (isVisible == 1) {
-		hud->SetStateInt("ShopMenu::visible", 0);
-		gameLocal.Printf("Shop closed.\n");
-		return false;  // Returning false because the shop is now closed
-	}
-	else {
-		hud->SetStateInt("ShopMenu::visible", 1);
-		gameLocal.Printf("Shop opened.\n");
-		return true;  // Returning true because the shop is now open
-	}
+void idPlayer::ToggleShopMenu( void ) {
+	shopMenuOpen ^= 1;
 }
 
 /*
@@ -8663,7 +8642,7 @@ void idPlayer::PerformImpulse( int impulse ) {
 // RITUAL END
 
 		case IMPULSE_50: {
-			ToggleFlashlight ( );
+			ToggleShopMenu();
 			break;
 		}
 
