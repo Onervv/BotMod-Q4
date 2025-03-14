@@ -272,7 +272,6 @@ public:
 
 	void EnemyKilled(idAI* enemy);
 	int killCount; // Keeps track of player kills
-	void ToggleShopMenu();  // Function to toggle shop visibility
 
  	enum {
  		EVENT_IMPULSE = idEntity::EVENT_MAXEVENTS,
@@ -766,7 +765,9 @@ public:
 	void					SetHudOverlay( idUserInterface* overlay, int duration );
 
 	void					SetShowHud( bool showHud );
-	bool					GetShowHud( void );
+	bool					GetShowHud(void);
+	bool                    ToggleShopMenu(void);  // Function to toggle shop visibility
+	
 
 
 	// mekberg: wrap saveMessages

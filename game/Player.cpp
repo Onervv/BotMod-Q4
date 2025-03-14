@@ -1854,20 +1854,6 @@ void idPlayer::Spawn( void ) {
 			gameLocal.Warning( "idPlayer::Spawn() - No hud for player." );
 		}
 
-		if (spawnArgs.GetString("hud", "", temp)) {
-			hud = uiManager->FindGui(temp, true, false, true);
-			if (!hud) {
-				gameLocal.Warning("idPlayer::Spawn() - Failed to load HUD!");
-			}
-			else {
-				hud->Activate(true, gameLocal.time);
-				hud->SetStateInt("ShopMenu::visible", 0);  // Ensure ShopMenu starts hidden
-			}
-		}
-		else {
-			gameLocal.Warning("idPlayer::Spawn() - No hud for player.");
-		}
-
 		if ( gameLocal.isMultiplayer ) {
 			if ( spawnArgs.GetString( "mphud", "", temp ) ) {
 				mphud = uiManager->FindGui( temp, true, false, true );
@@ -3403,12 +3389,15 @@ void idPlayer::UpdateHudAmmo( idUserInterface *_hud ) {
 idPlayer::ToggleShopMenu
 ===============
 */
-void idPlayer::ToggleShopMenu() {
-	if (gameLocal.InCinematic()) return;  // Prevent opening in cutscenes
+bool idPlayer::ToggleShopMenu(void) {
+	if (gameLocal.InCinematic()) {
+		gameLocal.Printf("DEBUG: Cannot open shop during cutscene.\n");
+		return false;  // Must return a value
+	}
 
 	if (!hud) {
 		gameLocal.Printf("ERROR: ToggleShopMenu - hud is NULL!\n");
-		return;  // Avoid calling functions on a NULL object
+		return false;  // Must return a value
 	}
 
 	int isVisible = hud->State().GetInt("ShopMenu::visible");
@@ -3417,10 +3406,12 @@ void idPlayer::ToggleShopMenu() {
 	if (isVisible == 1) {
 		hud->SetStateInt("ShopMenu::visible", 0);
 		gameLocal.Printf("Shop closed.\n");
+		return false;  // Returning false because the shop is now closed
 	}
 	else {
 		hud->SetStateInt("ShopMenu::visible", 1);
 		gameLocal.Printf("Shop opened.\n");
+		return true;  // Returning true because the shop is now open
 	}
 }
 
