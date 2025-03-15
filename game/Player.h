@@ -270,6 +270,9 @@ public:
 class idPlayer : public idActor {
 public:
 
+	void EnemyKilled(idAI* enemy);
+	int killCount; // Keeps track of player kills
+
  	enum {
  		EVENT_IMPULSE = idEntity::EVENT_MAXEVENTS,
  		EVENT_EXIT_TELEPORTER,
@@ -360,6 +363,7 @@ public:
 	int						spectator;
 
 	bool					scoreBoardOpen;
+	bool					shopMenuOpen;
 	bool					forceScoreBoard;
 	bool					forceRespawn;
 	int						forceScoreBoardTime;
@@ -762,7 +766,9 @@ public:
 	void					SetHudOverlay( idUserInterface* overlay, int duration );
 
 	void					SetShowHud( bool showHud );
-	bool					GetShowHud( void );
+	bool					GetShowHud(void);
+	void                    TrySpawnAlly(void);  // Function to toggle shop visibility
+	
 
 
 	// mekberg: wrap saveMessages

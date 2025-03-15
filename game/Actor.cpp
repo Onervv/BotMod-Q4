@@ -1019,7 +1019,7 @@ void idActor::Hide( void ) {
 	idEntity *ent;
 	idEntity *next;
 
-	idAFEntity_Base::Hide();
+	idAFEntity_Base::Hide(); 
 	if ( head.GetEntity() ) {
 		head.GetEntity()->Hide();
 	}

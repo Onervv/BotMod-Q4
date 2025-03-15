@@ -1081,6 +1081,9 @@ idPlayer::idPlayer() {
 
 	alreadyDidTeamAnnouncerSound = false;
 
+	killCount				= 0;		// Initalize Kill Count
+
+
 	doInitWeapon			= false;
 	noclip					= false;
 	godmode					= false;
@@ -3384,6 +3387,73 @@ void idPlayer::UpdateHudAmmo( idUserInterface *_hud ) {
 
 /*
 ===============
+idPlayer::SpawnAllySpell
+===============
+*/
+void idPlayer::TrySpawnAlly() {
+	int requiredKills = 1;
+
+	if (killCount >= requiredKills) {
+		killCount -= requiredKills;
+
+		idDict spawnArgs;
+
+		// Set the entity class
+		spawnArgs.Set("classname", "char_marine_tech_armed");
+
+		// Spawn at player's position, slightly in front
+		idVec3 spawnOrigin = GetPhysics()->GetOrigin() + idAngles(0, viewAngles.yaw, 0).ToForward() * 80;
+		spawnArgs.Set("origin", spawnOrigin.ToString());
+
+		// Set the entity's facing direction
+		spawnArgs.Set("angle", va("%f", viewAngles.yaw));
+
+		// Spawn the entity
+		idEntity* newEntity;
+		gameLocal.SpawnEntityDef(spawnArgs, &newEntity);
+
+		if (newEntity) {
+			gameLocal.Printf("Spell Activated! Ally spawned: %s\n", newEntity->name.c_str());
+
+			// Update the HUD text and trigger GUI message
+			if (hud) {
+				hud->SetStateString("SpellMessage::text", "Spell Activated!");
+				hud->HandleNamedEvent("showSpellMessage");
+			}
+		}
+		else {
+			gameLocal.Warning("Failed to spawn ally!");
+		}
+	}
+	else {
+		// Not enough kills - show message
+		if (hud) { 
+			hud->SetStateString("SpellMessage::text", "Not enough kills!");
+			hud->HandleNamedEvent("showSpellMessage");
+		}
+		gameLocal.Printf("Not enough kills to spawn an ally!\n");
+	}
+}
+
+/*
+===============
+idPlayer::EnemyKilled
+===============
+*/
+void idPlayer::EnemyKilled(idAI* enemy) {
+	if (!enemy) return;  // Ensure the enemy exists
+
+	killCount++;  // Increase kill count
+
+	// Print kill count as an in-game message
+	gameLocal.Printf("Kill Count: %d\n", killCount);
+	gameLocal.Warning("Current Kill Count: %d", killCount);
+
+	UpdateHudStats(hud);  // Update HUD to reflect new kill count
+}
+
+/*
+===============
 idPlayer::UpdateHudStats
 ===============
 */
@@ -3406,6 +3476,18 @@ void idPlayer::UpdateHudStats( idUserInterface *_hud ) {
 		_hud->SetStateInt ( "player_armor", inventory.armor );
 		_hud->SetStateFloat	( "player_armorpct", idMath::ClampFloat ( 0.0f, 1.0f, (float)inventory.armor / (float)inventory.maxarmor ) );
 		_hud->HandleNamedEvent ( "updateArmor" );
+	}
+
+	// Updating Kill Count
+	//temp = _hud->State().GetInt("player_kills", "-1");
+	//if (temp != killCount) {
+	//	_hud->SetStateString("gui::player_kills", va("%d", killCount));  // Convert killCount to string format
+	//}
+	
+	idStr killString = va("kills: %d", killCount);
+	idStr currentKills = _hud->State().GetString("player_kills");
+	if (currentKills != killString) {
+		_hud->SetStateString("player_kills", va("%d", killCount));
 	}
 	
 	// Boss bar
@@ -8601,7 +8683,7 @@ void idPlayer::PerformImpulse( int impulse ) {
 // RITUAL END
 
 		case IMPULSE_50: {
-			ToggleFlashlight ( );
+			ToggleFlashlight();
 			break;
 		}
 
