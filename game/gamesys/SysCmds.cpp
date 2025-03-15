@@ -563,22 +563,19 @@ Cmd_ToggleShop_f
 Toggles shop on and off
 ==================
 */
-//static void Cmd_ToggleShop_f(const idCmdArgs& args) {
-//	idPlayer* player;
-//	
-//	player = gameLocal.GetLocalPlayer();
-//
-//	if (!player) {
-//		return;  // Prevent calling a function on a deleted object
-//	}
-//	if (!player->hud) {
-//		gameLocal.Printf("ERROR: HUD is NULL in Cmd_ToggleShop_f\n");
-//		return;
-//	}
-//
-//	player->ToggleShopMenu();
-//}
+void Cmd_SpawnAlly_f(const idCmdArgs& args) {
+	idPlayer* player = gameLocal.GetLocalPlayer();
 
+	if (!player) {
+		return;  // Prevent calling a function on a deleted object
+	}
+	if (!player->hud) {
+		gameLocal.Printf("ERROR: HUD is NULL in Cmd_SpawnAlly_f\n");
+		return;
+	}
+
+	player->TrySpawnAlly();
+}
 
 /*
 ==================
@@ -3078,6 +3075,7 @@ void idGameLocal::InitConsoleCommands( void ) {
 //	cmdSystem->AddCommand( "writeGameState",		WriteGameState_f,			CMD_FL_GAME,				"write game state" );
 //	cmdSystem->AddCommand( "testSaveGame",			TestSaveGame_f,				CMD_FL_GAME|CMD_FL_CHEAT,	"test a save game for a level" );
 // RAVEN END
+	cmdSystem->AddCommand( "spawnally",			    Cmd_SpawnAlly_f,			CMD_FL_GAME,				"Spawns an ally if the player has enough kills");
 	cmdSystem->AddCommand( "game_memory",			idClass::DisplayInfo_f,		CMD_FL_GAME,				"displays game class info" );
 	cmdSystem->AddCommand( "listClasses",			idClass::ListClasses_f,		CMD_FL_GAME,				"lists game classes" );
 	cmdSystem->AddCommand( "listThreads",			idThread::ListThreads_f,	CMD_FL_GAME|CMD_FL_CHEAT,	"lists script threads" );

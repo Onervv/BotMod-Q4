@@ -3387,11 +3387,52 @@ void idPlayer::UpdateHudAmmo( idUserInterface *_hud ) {
 
 /*
 ===============
-idPlayer::ToggleShopMenu
+idPlayer::SpawnAllySpell
 ===============
 */
-void idPlayer::ToggleShopMenu( void ) {
-	shopMenuOpen ^= 1;
+void idPlayer::TrySpawnAlly() {
+	int requiredKills = 1;
+
+	if (killCount >= requiredKills) {
+		killCount -= requiredKills;
+
+		idDict spawnArgs;
+
+		// Set the entity class
+		spawnArgs.Set("classname", "char_marine_tech_armed");
+
+		// Spawn at player's position, slightly in front
+		idVec3 spawnOrigin = GetPhysics()->GetOrigin() + idAngles(0, viewAngles.yaw, 0).ToForward() * 80;
+		spawnArgs.Set("origin", spawnOrigin.ToString());
+
+		// Set the entity's facing direction
+		spawnArgs.Set("angle", va("%f", viewAngles.yaw));
+
+		// Spawn the entity
+		idEntity* newEntity;
+		gameLocal.SpawnEntityDef(spawnArgs, &newEntity);
+
+		if (newEntity) {
+			gameLocal.Printf("Spell Activated! Ally spawned: %s\n", newEntity->name.c_str());
+
+			// Update the HUD text and trigger GUI message
+			if (hud) {
+				hud->SetStateString("SpellMessage::text", "Spell Activated!");
+				hud->HandleNamedEvent("showSpellMessage");
+			}
+		}
+		else {
+			gameLocal.Warning("Failed to spawn ally!");
+		}
+	}
+	else {
+		// Not enough kills - show message
+		if (hud) { 
+			hud->SetStateString("SpellMessage::text", "Not enough kills!");
+			hud->HandleNamedEvent("showSpellMessage");
+		}
+		gameLocal.Printf("Not enough kills to spawn an ally!\n");
+	}
 }
 
 /*
@@ -8642,7 +8683,7 @@ void idPlayer::PerformImpulse( int impulse ) {
 // RITUAL END
 
 		case IMPULSE_50: {
-			ToggleShopMenu();
+			ToggleFlashlight();
 			break;
 		}
 

@@ -767,7 +767,7 @@ public:
 
 	void					SetShowHud( bool showHud );
 	bool					GetShowHud(void);
-	void                    ToggleShopMenu(void);  // Function to toggle shop visibility
+	void                    TrySpawnAlly(void);  // Function to toggle shop visibility
 	
 
 
